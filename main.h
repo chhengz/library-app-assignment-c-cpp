@@ -4,12 +4,12 @@
 #include <time.h>
 #include <math.h>
 #include <string>
+#include <fstream>
+#include <iomanip>
 #include <stdio.h>
 #include <conio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <iomanip>
-#include <fstream>
 #include <iostream>
 #include <windows.h>
 #include "style.h"
@@ -24,11 +24,12 @@ void showCursor();
 void Loading();
 
 char op, bop, rop, brop;
-char op_search, op_sort;
-int i, j;
+int i, j, id;
 int r = 0, w = 0;
 int n = 0, k = 0;
+int bw = 0, p = 0;
 int count_number_account = 0;
+
 //*__Main Class Person__*
 class Person
 {
@@ -62,71 +63,57 @@ public:
 	// ======== Login ========
 	void Login_form()
 	{
-		string __username, __password;
-		int check_number_count = 0, width = 0, height = 5, g = 3;
-		ifstream art_file("data/artText/login.txt");
-		string line;
+		string __username, __password, line;
+		int check_number_count = 0, width = 0, height = 5, g=0;
 	login_page:
 		clrscr();
+		g = 3;
+		ifstream art_file("data/artText/login.txt");
 		while (getline(art_file, line))
 		{
-			gotoxy(20, g++);
+			gotoxy(30, g++);
 			cout << line << "\n";
 		}
-		art_file.close();
 		cout << endl;
 		// user box
 		DrawRectangle(50 + width, 5 + height, 20, 1);
 		// pass box
 		DrawRectangle(50 + width, 9 + height, 20, 1);
-		gotoxy(40 + width, 6 + height);
-		cout << "USERNAME";
-		gotoxy(40 + width, 10 + height);
-		cout << "PASSWORD";
-		gotoxy(52 + width, 6 + height);
-		cin >> __username;
-		gotoxy(52 + width, 10 + height);
-		cin >> __password;
-		if (__username == "RUPP" && __password == "A6")
+		gotoxy(40 + width, 6 + height); cout << "USERNAME";
+		gotoxy(40 + width, 10 + height); cout << "PASSWORD";
+		gotoxy(52 + width, 6 + height); cin >> __username;
+		gotoxy(52 + width, 10 + height); cin >> __password;
+		if (__username == "RUPP" && __password == "A6" || __username == getUsername() && __password == getPassword())
 		{
-			gotoxy(20, 12);
-			cout << "[ Login Successfully ]";
-			getch();
+			clrscr();
+			Loading();
 		}
 		else
 		{
 			check_number_count++;
-			if (__username == getUsername() && __password == getPassword())
+			if (check_number_count == 2)
 			{
-				gotoxy(20, 12);
-				cout << "[ Login Successfully ]";
-				getch();
+				cout << "\n>>> Forget Username and Password? <<<\n--> Press 'Enter' to RESET the Username and Password  OR 'ESC' to EXIT :: ";
+				if (getch() == 13)
+				{
+					MAKEAccount();
+					goto login_page;
+				}
+				else if (getch() == 27)
+				{
+					cout << "\n\n\t\tTHANK YOU " << (char)3;
+					getch();
+					exit(300);
+				}
 			}
 			else
 			{
-				if (check_number_count == 2)
-				{
-					cout << "\n>>> Forget Username and Password? <<<\n--> Press 'Enter' to RESET the Username and Password  OR 'ESC' to EXIT :: ";
-					if (getch() == 13)
-					{
-						MAKEAccount();
-						goto login_page;
-					}
-					else if (getch() == 27)
-					{
-						cout << "THANK YOU " << (char)3;
-						getch();
-						exit(0);
-					}
-				}
-				else
-				{
-					cout << "\nUsername or Password Worng!, Please login again..." << endl;
-					getch();
-					goto login_page;
-				}
+				cout << "\nUsername or Password Worng!, Please login again..." << endl;
+				getch();
+				goto login_page;
 			}
 		}
+		art_file.close();
 	}
 };
 // *===================================================
@@ -188,30 +175,29 @@ public:
 	{
 		this->book_qty = qty;
 	}
-	void input_book()
-	{
-		fstream book_file;
-		book_file.open("data/book_information.txt", ios::app);
-		if (!book_file)
-		{
-			bop = '0';
-		}
 
-		cout << "Input Book Code   : ";
-		cin >> book_code; // code
-		cout << "Input Book Title  : ";
-		cin.clear();
-		cin.ignore();
-		getline(cin, book_title); // title
-		cout << "Input Book Author : ";
-		cin >> book_author; // author
-		cout << "Input Book Date   : ";
-		cin >> book_date; // date 10/03/2023
-		cout << "Input Book Qty    : ";
-		cin >> book_qty; // qty
-		book_file << book_code << "\t" << book_title << "\t" << book_author << "\t" << book_date << "\t" << book_qty << endl;
-		book_file.close();
+	int count_string(string s)
+	{
+		int ss;
+		ss = s.length();
+		return ss;
 	}
+
+	string Check_Book_Staus(int t)
+	{
+		if (t >= 1)
+		{
+			foreColor(2);
+			book_status = "Remaining";
+		}
+		if (t == 0)
+		{
+			foreColor(4);
+			book_status = "Does not exist";
+		}
+		return book_status;
+	}
+
 	void book_header()
 	{
 		foreColor(4);
@@ -224,574 +210,353 @@ public:
 			 << setw(17) << "AUTHOR"
 			 << setw(17) << "DATE"
 			 << setw(17) << "QUANTITY"
-			 << setw(17) << "SRATUS" << endl;
+			 << setw(17) << "SRATUS";
 	}
-	void show_book()
-	{
-		foreColor(4);
-		cout << left
-			 << setw(10) << book_code
-			 << setw(20) << book_title
-			 << setw(17) << book_author
-			 << setw(17) << book_date
-			 << setw(17) << book_qty
-			 << setw(17) << endl;
-	}
-	void readAndShowBook(fstream &book_file)
-	{
-		book_file >> book_code >> book_title >> book_author >> book_date >> book_qty;
 
-		foreColor(4);
-		cout << left
-			 << setw(10) << book_code
-			 << setw(20) << book_title
-			 << setw(17) << book_author
-			 << setw(17) << book_date
-			 << setw(17) << book_qty
-			 << setw(17) << endl;
-	}
-	void show_book_list(BookData obj[], int n)
+	void input_book()
 	{
-		fstream book_file;
-		book_file.open("data/book_information.txt", ios::in);
-		if (!book_file)
+		string new_book_code;
+		foreColor(7); cout << "Input Book Code      : "; foreColor(6); cin >> new_book_code;
+
+		ifstream check_file("data/book_information.txt");
+		string existing_book_code;
+		bool code_exists = false;
+
+		while (getline(check_file, existing_book_code))
 		{
-			bop = '0';
+			if (existing_book_code == new_book_code)
+			{
+				code_exists = true;
+				break;
+			}
 		}
-		int line = 0, i = 0;
-		book_header();
+		check_file.close();
+
+		if (code_exists)
+		{
+			foreColor(4);
+			cout << "This CODE is already exists."; getch();
+			return;
+		}
+		foreColor(7); cout << "Input Book Title  	: "; foreColor(6); cin.clear(); cin.ignore(); getline(cin, book_title);
+		foreColor(7); cout << "Input Book Author    : "; foreColor(6); cin >> book_author;
+		foreColor(7); cout << "Input Book Date   	: "; foreColor(6); cin >> book_date;
+		foreColor(7); cout << "Input Book Qty    	: "; foreColor(6); cin >> book_qty;
+		id++;
+
+		ofstream book_file("data/book_information.txt", ios::app);
+		book_file << endl << new_book_code << "\n" << book_title << "\n" << book_author << "\n" << book_date << "\n" << book_qty;
+		book_file.close();
+
+		book_file.open("data/ID_book.txt");
+		book_file << id;
+		book_file.close();
+
+		cout << "SAVE COMPLITE!";
+	}
+
+	// =============== SHOW BOOK ===============
+	void show_book(BookData b)
+	{
+		int i;
+		drawBoxSingleLine(9, 6 * i, 30 + book_title.length(), 7);
+		foreColor(3); gotoxy(5, 7 * i + 2); cout << "Book Code          :  " ; foreColor(6);cout << b.book_code << endl;
+		foreColor(3); gotoxy(5, 7 * i + 3); cout << "Book Title         :  " ; foreColor(1);cout <<b.book_title << endl;
+		foreColor(3); gotoxy(5, 7 * i + 4); cout << "Book Author        :  " ; foreColor(1);cout <<b.book_author << endl;
+		foreColor(3); gotoxy(5, 7 * i + 5); cout << "Book Date          :  " ; foreColor(1);cout <<b.book_date << endl;
+		foreColor(3); gotoxy(5, 7 * i + 6); cout << "Book Quantity      :  " ; foreColor(1);cout <<b.book_qty << endl;
+		foreColor(3); gotoxy(5, 7 * i + 7); cout << "Book Status        :  " ; foreColor(1);cout << Check_Book_Staus(b.book_qty) << endl;
+	}
+
+	void show_book(BookData b, int i)
+	{
+		foreColor(3); gotoxy(8, 8 * i  + 3); cout << "Book Code          :  " ; foreColor(6);cout << b.book_code << endl;
+		foreColor(3); gotoxy(8, 8 * i  + 4); cout << "Book Title         :  " ; foreColor(1);cout <<b.book_title << endl;
+		foreColor(3); gotoxy(8, 8 * i  + 5); cout << "Book Author        :  " ; foreColor(1);cout <<b.book_author << endl;
+		foreColor(3); gotoxy(8, 8 * i  + 6); cout << "Book Date          :  " ; foreColor(1);cout <<b.book_date << endl;
+		foreColor(3); gotoxy(8, 8 * i  + 7); cout << "Book Quantity      :  " ; foreColor(1);cout <<b.book_qty << endl;
+		foreColor(3); gotoxy(8, 8 * i  + 8); cout << "Book Status        :  " ; foreColor(1);cout << Check_Book_Staus(b.book_qty) << endl;
+
+		// drawBoxSingleLine(3, (7 * i) + (2*i), 100, 7);
+	}
+
+	// =============== SHOW BOOK LIST ===============
+	void show_book_list()
+	{
+		BookData book;
+		int line = 0, index = 0;
+		ifstream book_file;
+		book_file.open("data/book_information.txt");
 
 		while (!book_file.eof())
 		{
-			// book_file.getline(obj[i].show_book(), n);
-			gotoxy(10, 7 + i);
-			obj[i].readAndShowBook(book_file);
-			i++;
-			line++;
+			book_file >> book.book_code;
+			book_file.ignore(); getline(book_file, book.book_title);
+			book_file >> book.book_author >> book.book_date >> book.book_qty;
+
+			index++;
+
+			foreColor(6);
+			gotoxy(10, 8 * index + 2);
+			cout << "No. " << index << endl;
+			show_book(book, index);
 		}
+			book_file.close();
+		
+	}
+
+	// =============== SEARCH BOOK ===============
+	string searchBook()
+	{
+		BookData book;
+		string search;
+		int found = 0, index = 0;;
+
+		drawBoxSingleLine(38, 4, 10, 1);
+		gotoxy(22, 5);
+		cout << "Input Book Code";
+		gotoxy(39, 5);
+		cin >> search;
+
+		ifstream book_file;
+		book_file.open("data/book_information.txt");
+
+		while (!book_file.eof())
+		{
+			book_file >> book.book_code;
+			book_file.ignore();
+			getline(book_file, book.book_title);
+			book_file >> book.book_author >> book.book_date >> book.book_qty;
+
+			// Compare the book code with the search input
+			if (book.book_code == search)
+			{
+				index++;
+
+				foreColor(6);
+				gotoxy(10, 7 * index + 1);
+				cout << "No. " << index << endl;
+
+				show_book(book, index);
+				found = 1;
+				break;
+			}
+
+			// Move to the next line in the file
+			book_file.ignore(1000, '\n');
+		}
+
 		book_file.close();
-		drawBoxSingleLine(9, 6, 100, line);
+
+		if (found == 0)
+		{
+			foreColor(4);
+			gotoxy(30, 7);
+			cout << "Book Not Found!" << endl;
+		}
+
+		return search;
 	}
-	// *===== SEARCH BOOK =====*
-	void searchBook(BookData obj[], int n)
+	// =============== SORT BOOK [QTY] ===============
+	void sortBookByQTY()
 	{
-		char op_search;
-		string search;
-		int line = 0, found;
-		do
+		int n=0, found = 0;
+		BookData B[MAX], objBtmp;
+		ofstream Book_Tmp;
+		Book_Tmp.open("data/temp.txt");
+		ifstream book_file;
+		book_file.open("data/book_information.txt");
+
+		while (!book_file.eof())
 		{
-			clrscr();
-			cout << "\n----------------------------------" << endl;
-			cout << "\t----> [SEARCH BOOK] <----" << endl;
-			cout << "----------------------------------" << endl;
-			cout << "\t[1] BY CODE" << endl
-				 << "\t[2] BY AUTHOR" << endl
-				 << "\t[0] Back" << endl;
-			cout << "----------------------------------" << endl;
-			cout << ">>> choose one option : ";
-			op_search = getch();
-			switch (op_search)
-			{
-			case '1':
-			{
-				cout << "\nInput Book Code to Search : ";
-				cin >> search;
-				found = 0;
-				line = 0;
-				for (int i = 0; i < n; i++)
-				{
-					if (search == obj[i].getCode())
-					{
-						found = 1;
-						if (i <= 1)
-						{
-							clrscr();
-							book_header();
-						}
-						line++;
-						gotoxy(10, 7 + line);
-						obj[i].show_book();
-					}
-				}
-				if (found == 1)
-				{
-					drawBoxSingleLine(9, 6, 100, line);
-					getch();
-				}
-				if (found == 0)
-				{
-					cout << "Error : NOT FOUND!" << endl;
-					getch();
-				}
-			}
-			break;
-			case '2':
-			{
-				cout << "\nInput Book Author to Search : ";
-				cin >> search;
-				found = 0;
-				line = 0;
-				for (int i = 0; i < n; i++)
-				{
-					if (search == obj[i].getAuthor())
-					{
-						found = 1;
-						if (i <= 1)
-						{
-							clrscr();
-							book_header();
-						}
-						line++;
-						gotoxy(10, 7 + line);
-						obj[i].show_book();
-					}
-				}
-				if (found == 1)
-				{
-					drawBoxSingleLine(9, 6, 100, line);
-					getch();
-				}
-				if (found == 0)
-				{
-					cout << "Error : NOT FOUND!" << endl;
-					getch();
-				}
-			}
-			break;
-			default:
-				break;
-			}
-		} while (op_search != '0');
-	}
-	// *===== SORT BOOK =====*
-	void sortBook(BookData obj[], int n)
-	{
-		BookData objBtmp;
-		char op_sort;
-		int found;
-		do
+
+			book_file >> B[n].book_code;
+			book_file.ignore(); getline(book_file, B[n].book_title);
+			book_file >> B[n].book_author >> B[n].book_date >> B[n].book_qty;
+			n++;
+
+		}
+		for (int i = 0; i < n; i++)
 		{
-			clrscr();
-			cout << "\n---------------------------------" << endl;
-			cout << ">>> [SORT BOOK INFORMATION] <<<" << endl;
-			cout << "---------------------------------" << endl;
-			cout << "\t[1] Sort By Code" << endl
-				 << "\t[2] Sort By Title" << endl
-				 << "\t[3] Sort By Author" << endl
-				 << "\t[4] Sort By Quantity" << endl
-				 << "\t[0] Back" << endl;
-			cout << "---------------------------------" << endl;
-			cout << "--> Choose one opition : ";
-			op_sort = getch();
-			switch (op_sort)
+			for (int j = i + 1; j < n; j++)
 			{
-			case '1':
-			{
-				found = 0;
-				for (int i = 0; i < n; i++)
+				if ( B[i].book_qty < B[j].book_qty )
 				{
-					for (int j = i + 1; j < n; j++)
-					{
-						if (obj[i].getCode() < obj[j].getCode())
-						{
-							objBtmp = obj[i];
-							obj[i] = obj[j];
-							obj[j] = objBtmp;
-							found = 1;
-						}
-					}
-				}
-				if (found == 0)
-				{
-					cout << "Sort Not Success!" << endl;
-					getch();
-				}
-				else
-				{
-					cout << "Sort Successfully!" << endl;
-					getch();
-				}
-			}
-			break;
-			case '2':
-			{
-				found = 0;
-				for (int i = 0; i < n; i++)
-				{
-					for (int j = i + 1; j < n; j++)
-					{
-						if (obj[i].getTitle() < obj[j].getTitle())
-						{
-							objBtmp = obj[i];
-							obj[i] = obj[j];
-							obj[j] = objBtmp;
-							found = 1;
-						}
-					}
-				}
-				if (found == 0)
-				{
-					cout << "Sort Not Success!" << endl;
-					getch();
-				}
-				else
-				{
-					cout << "Sort Successfully!" << endl;
-					getch();
-				}
-			}
-			break;
-			case '3':
-			{
-				found = 0;
-				for (int i = 0; i < n; i++)
-				{
-					for (int j = i + 1; j < n; j++)
-					{
-						if (obj[i].getAuthor() < obj[j].getAuthor())
-						{
-							objBtmp = obj[i];
-							obj[i] = obj[j];
-							obj[j] = objBtmp;
-							found = 1;
-						}
-					}
-				}
-				if (found == 0)
-				{
-					cout << "Sort Not Success!" << endl;
-					getch();
-				}
-				else
-				{
-					cout << "Sort Successfully!" << endl;
-					getch();
-				}
-			}
-			break;
-			case '4':
-			{
-				found = 0;
-				for (int i = 0; i < n; i++)
-				{
-					for (int j = i + 1; j < n; j++)
-					{
-						if (obj[i].getQty() < obj[j].getQty())
-						{
-							objBtmp = obj[i];
-							obj[i] = obj[j];
-							obj[j] = objBtmp;
-							found = 1;
-						}
-					}
-				}
-				if (found == 0)
-				{
-					cout << "Sort Not Success!" << endl;
-					getch();
-				}
-				else
-				{
-					cout << "Sort Successfully!" << endl;
-					getch();
-				}
-			}
-			break;
-			default:
-				break;
-			}
-		} while (op_sort != '0');
-	}
-	// *===== UPDATE BOOK =====*
-	void updateBook(BookData obj[], int n)
-	{
-		char op_update;
-		string search;
-		int found, line, a;
-		do
-		{
-			clrscr();
-			foreColor(7);
-			cout << "----------------------------------" << endl;
-			cout << "\t[1] Update By Code" << endl
-				 << "\t[2] Update By Author" << endl
-				 << "\t[0] Back" << endl;
-			cout << "----------------------------------" << endl;
-			cout << "--> Choose one option : ";
-			op_update = getch();
-			switch (op_update)
-			{
-			case '1':
-			{
-				line = 0;
-				// gotoxy(10, 15);
-				cout << "\nInput Book Code to Update : ";
-				cin >> search;
-				found = 0;
-				// Loading();
-				for (int i = 0; i < n; i++)
-				{
-					drawBoxSingleLine(9, 6, 100, line);
-					if (search == obj[i].getCode())
-					{
-						clrscr();
-						line++;
-						obj->book_header();
-						gotoxy(10, 7 + a);
-						obj[i].show_book();
-						drawBoxSingleLine(9, 6, 100, line);
-						found = 1;
-						cout << "\n\tPress 'Enter' to Update or 'ESC' to Exit:: ";
-						if (getch() == 13)
-						{
-							a++;
-							do
-							{
-								cout << "\n---------------------------------" << endl
-									 << "==== What you want to update ====" << endl
-									 << "---------------------------------" << endl
-									 << "\t[1] Code\t\t[4] Date" << endl
-									 << "\t[2] Title\t\t[5] Qty" << endl
-									 << "\t[3] Author\t\t[6] Update All" << endl
-									 << "\t\t[0] Back" << endl
-									 << "---------------------------------" << endl
-									 << "--> Choose one option : ";
-								op_update = getch();
-								switch (op_update)
-								{
-								case '1':
-								{
-									cout << "\n--> Update Code [" << obj[i].getCode() << "] to : ";
-									cin >> obj[i].book_code;
-								}
-								break;
-								case '2':
-								{
-									cout << "\n--> Update Title [" << obj[i].getTitle() << "] to : ";
-									cin.clear();
-									cin.ignore();
-									getline(cin, obj[i].book_title);
-								}
-								break;
-								case '3':
-								{
-									cout << "\n--> Update Author [" << obj[i].getAuthor() << "] to : ";
-									cin >> obj[i].book_author;
-								}
-								break;
-								case '4':
-								{
-									cout << "\n--> Update Date [" << obj[i].getDate() << "] to : ";
-									cin >> obj[i].book_date;
-								}
-								break;
-								case '5':
-								{
-									cout << "\n--> Update Qty [" << obj[i].getQty() << "] to : ";
-									cin >> obj[i].book_qty;
-								}
-								break;
-								case '6':
-								{
-									cout << "\n--> UPDATE ALL BOOK INFORMATION [CODE:" << obj[i].getCode() << " ]" << endl;
-									obj[i].input_book();
-								}
-								break;
-								default:
-									break;
-								}
-							} while (op_update != '0');
-						}
-						else if (getch() == 27)
-						{
-							break;
-						}
-					}
-				}
-				if (found == 0)
-				{
-					gotoxy(47, 15);
-					cout << "\nError : NOT FOUND!" << endl;
-					getch();
-				}
-			}
-			break;
-			case '2':
-			{
-				line = 0;
-				cout << "\nInput Book Author to Update : ";
-				cin >> search;
-				found = 0;
-				// Loading();
-				for (int i = 0; i < n; i++)
-				{
-					drawBoxSingleLine(9, 6, 100, line);
-					if (search == obj[i].getAuthor())
-					{
-						clrscr();
-						line++;
-						obj->book_header();
-						gotoxy(10, 7 + a);
-						obj[i].show_book();
-						drawBoxSingleLine(9, 6, 100, line);
-						found = 1;
-						cout << "\n\tPress 'Enter' to Update or 'ESC' to Exit:: ";
-						if (getch() == 13)
-						{
-							a++;
-							do
-							{
-								cout << "\n---------------------------------" << endl
-									 << "==== What you want to update ====" << endl
-									 << "---------------------------------" << endl
-									 << "\t[1] Code\t\t[4] Date" << endl
-									 << "\t[2] Title\t\t[5] Qty" << endl
-									 << "\t[3] Author\t\t[6] Update All" << endl
-									 << "\t\t[0] Back" << endl
-									 << "---------------------------------" << endl
-									 << "--> Choose one option : ";
-								op_update = getch();
-								switch (op_update)
-								{
-								case '1':
-								{
-									cout << "\n--> Update Code [" << obj[i].getCode() << "] to : ";
-									cin >> obj[i].book_code;
-								}
-								break;
-								case '2':
-								{
-									cout << "\n--> Update Title [" << obj[i].getTitle() << "] to : ";
-									cin.clear();
-									cin.ignore();
-									getline(cin, obj[i].book_title);
-								}
-								break;
-								case '3':
-								{
-									cout << "\n--> Update Author [" << obj[i].getAuthor() << "] to : ";
-									cin >> obj[i].book_author;
-								}
-								break;
-								case '4':
-								{
-									cout << "\n--> Update Date [" << obj[i].getDate() << "] to : ";
-									cin >> obj[i].book_date;
-								}
-								break;
-								case '5':
-								{
-									cout << "\n--> Update Qty [" << obj[i].getQty() << "] to : ";
-									cin >> obj[i].book_qty;
-								}
-								break;
-								case '6':
-								{
-									cout << "\n--> UPDATE ALL BOOK INFORMATION [CODE:" << obj[i].getCode() << " ]" << endl;
-									obj[i].input_book();
-								}
-								break;
-								default:
-									break;
-								}
-							} while (op_update != '0');
-						}
-						else if (getch() == 27)
-						{
-							break;
-						}
-					}
-				}
-				if (found == 0)
-				{
-					gotoxy(47, 15);
-					cout << "Error : NOT FOUND!" << endl;
-					getch();
-				}
-			}
-			break;
-			default:
-				break;
-			}
-		} while (op_update != '0');
-	}
-	void deleteBook(BookData obj[], int n)
-	{
-		char delete_op;
-		string del_code, del_title;
-		int found;
-		clrscr();
-		cout << "\n---------------------------------" << endl;
-		cout << ">>> [DELETE BOOK INFORMATION] <<<" << endl;
-		cout << "---------------------------------" << endl;
-		cout << "\t[1] Delete By Code" << endl
-			 << "\t[2] Delete By Title" << endl
-			 << "\t[0] Back" << endl;
-		cout << "---------------------------------" << endl;
-		cout << "--> Choose one opition : ";
-		delete_op = getch();
-		switch (delete_op)
-		{
-		case '1':
-		{
-			cout << "Enter Book Code to Delete : ";
-			cin >> del_code;
-			for (int i = 0; i < n; i++)
-			{
-				if (del_code == obj[i].getCode())
-				{
-					for (int j = i; j < n; j++)
-					{
-						obj[i] = obj[j + 1];
-					}
-					n--;
+					objBtmp = B[i];
+					B[i] = B[j];
+					B[j] = objBtmp;
 					found = 1;
 				}
 			}
-			if (found == 0)
-			{
-				cout << "Delete Not Success!" << endl;
-				getch();
-			}
-			else
-			{
-				cout << "Delete Successfully!" << endl;
-				getch();
-			}
 		}
-		break;
-		case '2':
+		for(int i = 0; i < n; i++)
 		{
-			cout << "Enter Book Title to Delete : ";
-			cin >> del_code;
-			for (int i = 0; i < n; i++)
+			Book_Tmp << "\n" << B[i].book_code 
+					<< "\n" << B[i].book_title 
+					<< "\n" << B[i].book_author 
+					<< "\n" << B[i].book_date 
+					<< "\n" << B[i].book_qty;
+		}
+			book_file.close();
+			Book_Tmp.close();
+			remove("data/book_information.txt");
+			rename("data/temp.txt", "data/book_information.txt");
+
+		if(found == 1) { foreColor(2); cout << "\n\t[SORT COMPLETED!]"; } else { foreColor(4); cout << "\n\t[SORT NOT COMPLETE!]"; }
+	}
+	// =============== SORT BOOK [CODE] ===============
+	void sortBookByCODE()
+	{
+		int n=0, found = 0;
+		BookData B[MAX], objBtmp;
+		ofstream Book_Tmp;
+		Book_Tmp.open("data/temp.txt");
+		ifstream book_file;
+		book_file.open("data/book_information.txt");
+
+		while (!book_file.eof())
+		{
+
+			book_file >> B[n].book_code;
+			book_file.ignore(); getline(book_file, B[n].book_title);
+			book_file >> B[n].book_author >> B[n].book_date >> B[n].book_qty;
+			n++;
+
+		}
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = i + 1; j < n; j++)
 			{
-				if (del_code == obj[i].getTitle())
+				if ( B[i].book_code > B[j].book_code )
 				{
-					for (int j = i; j < n; j++)
-					{
-						obj[i] = obj[j + 1];
-					}
-					n--;
+					objBtmp = B[i];
+					B[i] = B[j];
+					B[j] = objBtmp;
 					found = 1;
 				}
 			}
-			if (found == 0)
-			{
-				cout << "Delete Not Success!" << endl;
-				getch();
-			}
-			else
-			{
-				cout << "Delete Successfully!" << endl;
-				getch();
-			}
 		}
-		break;
-		default:
-			break;
+		for(int i = 0; i < n; i++)
+		{
+			Book_Tmp << "\n" << B[i].book_code 
+					<< "\n" << B[i].book_title 
+					<< "\n" << B[i].book_author 
+					<< "\n" << B[i].book_date 
+					<< "\n" << B[i].book_qty;
+		}
+			book_file.close();
+			Book_Tmp.close();
+			remove("data/book_information.txt");
+			rename("data/temp.txt", "data/book_information.txt");
+
+		if(found == 1) { foreColor(2); cout << "\n\t[SORT COMPLETED!]"; } else { foreColor(4); cout << "\n\t[SORT NOT COMPLETE!]"; }
+	}
+	
+	// =============== UPDATE BOOK ===============
+	void updateBook()
+	{
+		
+		string code = searchBook();
+		char update_op;
+		cout << "\n\tYou want to update this Book Data (y/n) : "; cin >> update_op;
+		if(update_op == 'y' || update_op == 'Y')
+		{
+			BookData NewBook;
+			cout << "\tInput Book Title  	: "; cin.clear(); cin.ignore(); getline(cin, NewBook.book_title);
+			cout << "\tInput Book Author    : "; cin.clear(); cin.ignore(); getline(cin, NewBook.book_author);
+			cout << "\tInput Book Date   	: "; cin >> NewBook.book_date;
+			cout << "\tInput Book Qty    	: "; cin >> NewBook.book_qty;
+			BookData book;
+			ofstream Book_Tmp;
+			Book_Tmp.open("data/temp.txt");
+			ifstream book_file;
+			book_file.open("data/book_information.txt");
+
+			while(!book_file.eof())
+			{
+				book_file >> book.book_code;
+				book_file.ignore();
+				getline(book_file, book.book_title);
+				book_file >> book.book_author >> book.book_date >> book.book_qty;
+
+				NewBook.book_code = book.book_code;
+
+				if(book.book_code != code)
+				{
+				
+					Book_Tmp<< "\n" << book.book_code 
+							<< "\n" << book.book_title 
+							<< "\n" << book.book_author 
+							<< "\n" << book.book_date 
+							<< "\n" << book.book_qty;
+				}
+				else
+				{
+					Book_Tmp << "\n" << NewBook.book_code 
+							<< "\n" << NewBook.book_title 
+							<< "\n" << NewBook.book_author 
+							<< "\n" << NewBook.book_date 
+							<< "\n" << NewBook.book_qty;
+					
+				}
+			}
+			book_file.close();
+			Book_Tmp.close();
+			remove("data/book_information.txt");
+			rename("data/temp.txt", "data/book_information.txt");
+			foreColor(2);
+			cout << "\n\t[UPDATE COMPLETED!]";
+		}
+		else
+		{
+			foreColor(4);
+			cout << "\n\t[UPDATE NOT COMPLETED!]";
 		}
 	}
+
+	// =============== DELETE BOOK ===============
+	void deleteBook()
+	{
+		char del_op;
+		string code = searchBook();
+		cout << "\n\tYou want to delete this Book Data (y/n) : "; cin >> del_op;
+		if(del_op == 'y' || del_op == 'Y')
+		{
+			BookData book;
+			ofstream Book_Tmp;
+			Book_Tmp.open("data/temp.txt");
+			ifstream book_file;
+			book_file.open("data/book_information.txt");
+			while(!book_file.eof())
+			{
+				book_file >> book.book_code;
+				book_file.ignore();
+				getline(book_file, book.book_title);
+				book_file >> book.book_author >> book.book_date >> book.book_qty;
+				
+				if(code != book.book_code)
+				{
+					Book_Tmp << "\n" << book.book_code 
+							<< "\n" << book.book_title 
+							<< "\n" << book.book_author
+							<< "\n" << book.book_date
+							<< "\n" << book.book_qty;
+				}
+			}
+			book_file.close();
+			Book_Tmp.close();
+			remove("data/book_information.txt");
+			rename("data/temp.txt", "data/book_information.txt");
+			foreColor(2);
+			cout << "\n\t[DELETE COMPLETED!]";
+		}
+		else
+		{
+			foreColor(4);
+			cout << "\n\t[DELETE NOT COMPLETED!]";
+		}
+	}
+
 };
 // *===================================================
 // *             *____ Reader ____*
@@ -799,17 +564,19 @@ public:
 class ReaderData
 {
 protected:
+	int borrow_count;
 	string rid, phone, name, date, type, status;
 
 public:
 	ReaderData()
 	{
+		borrow_count = 0;
 		rid = "Unknow";
 		name = "Unknow";
 		phone = "Unknow";
 		date = "Unknow";
 		type = "Unknow";
-		status = "No Status";
+		status = "...";
 	}
 	string getId()
 	{
@@ -831,6 +598,10 @@ public:
 	{
 		return date;
 	}
+	string getStatus()
+	{
+		return status;
+	}
 	void setID(string id)
 	{
 		this->rid = id;
@@ -851,670 +622,780 @@ public:
 	{
 		this->date = date;
 	}
+	string Check_Reader_Staus(int t)
+	{
+		if (t == 0)
+		{
+			foreColor(4);
+			status = "Not Borrow";
+		}
+		if (t > 0)
+		{
+			foreColor(2);
+			status = "Borrower";
+		}
+		return status;
+	}
 	void input_reader()
 	{
-		cout << "Input Reader Id    : ";
-		cin >> rid;
-		cout << "Input Reader Name  : ";
-		cin.clear();
-		cin.ignore();
-		getline(cin, name);
-		cout << "Input Reader Phone : ";
-		cin >> phone;
-		cout << "Input Reader Type  : ";
-		cin >> type;
-		cout << "Input Reader Date  : ";
-		cin >> date;
+		string new_reader_id;
+	check_id:
+		foreColor(7); cout << "Input Reader ID    : "; foreColor(6); cin >> new_reader_id;
+		ifstream check_file("data/reader_information.txt");
+		string existing_reader_id;
+		bool code_exists = false;
+		while (getline(check_file, existing_reader_id))
+		{
+			if (existing_reader_id == new_reader_id)
+			{
+				code_exists = true;
+				break;
+			}
+		}
+		check_file.close();
+		if (code_exists)
+		{
+			foreColor(4);
+			cout << "This ID is already exists."; getch();
+			goto check_id;
+			return;
+		}
+		foreColor(7); cout << "Input Reader Name  : "; foreColor(6); cin.clear(); cin.ignore(); getline(cin, name);
+		foreColor(7); cout << "Input Reader Phone : "; foreColor(6); cin >> phone;
+		foreColor(7); cout << "Input Reader Type  : "; foreColor(6); cin >> type;
+		foreColor(7); cout << "Input Reader Date  : "; foreColor(6); cin >> date;
+		id++;
+		ofstream reader_file("data/reader_information.txt", ios::app);
+		reader_file << endl << new_reader_id
+					<< "\t" << name 
+					<< "\t" << phone 
+					<< "\t" << type 
+					<< "\t" << date;
+		reader_file.close();
+		reader_file.open("data/ID_reader.txt");
+		reader_file << id;
+		reader_file.close();
+		cout << "SAVE COMPLITE!";
 	}
+	// =============== HEADER ===============
 	void reader_header()
 	{
 		foreColor(4);
 		drawBoxSingleLine(9, 3, 100, 1);
 		gotoxy(10, 4);
 		foreColor(7);
-		cout << "\t" << left
+		cout << left
 			 << setw(10) << "ID"
 			 << setw(17) << "NAME"
 			 << setw(20) << "PHONE NUMBER"
 			 << setw(17) << "TYPE"
 			 << setw(17) << "DATE"
-			 << setw(17) << "SRATUS" << endl;
+			 << setw(17) << "SRATUS";
 	}
-	void show_reader()
+	// =============== SHOW READER (RETURN DATA) ===============
+	void show_reader(ReaderData r, int i)
 	{
-		foreColor(4);
-		cout << left
-			 << setw(17) << rid
-			 << setw(17) << name
-			 << setw(17) << phone
-			 << setw(17) << type
-			 << setw(17) << date
-			 << setw(17) << endl;
+		foreColor(6);
+		gotoxy(10, 7 + i);
+		cout << left 
+				<< setw(10) << r.rid 
+				<< setw(17) << r.name 
+				<< setw(20) << r.phone 
+				<< setw(17) << r.type 
+				<< setw(17) << r.date
+				<< setw(17) << Check_Reader_Staus(r.borrow_count);
 	}
-	void show_reader_list(ReaderData obj[], int r)
+	// =============== SHOW READER LIST ===============
+	void show_reader_list()
 	{
-		int line = 0;
+		ReaderData reader;
+		int index = 0;
+		ifstream reader_file;
+		reader_file.open("data/reader_information.txt");
 		reader_header();
-		for (int i = 0; i < r; i++)
+		while (!reader_file.eof())
 		{
-			gotoxy(10, 7 + i);
-			obj[i].show_reader();
-			line++;
+			reader_file >> reader.rid >> reader.name >> reader.phone >> reader.type >> reader.date;
+			foreColor(6);
+			show_reader(reader, index);
+			index++;
 		}
-		drawBoxSingleLine(9, 6, 100, line);
+		reader_file.close();
+		drawBoxSingleLine(9, 6, 100, index);
 	}
-	// *===== SEARCH READER =====*
-	void searchReader(ReaderData obj[], int r)
+	// =============== SEARCH READER ===============
+	string searchReader()
 	{
-		char op_search;
+		ReaderData reader;
 		string search;
-		int line = 0, found;
-		do
-		{
-			clrscr();
-			cout << "\n----------------------------------" << endl;
-			cout << "\t----> [SEARCH READER] <----" << endl;
-			cout << "----------------------------------" << endl;
-			cout << "\t[1] BY ID" << endl
-				 << "\t[2] BY NAME" << endl
-				 << "\t[0] Back" << endl;
-			cout << "----------------------------------" << endl;
-			cout << ">>> choose one option : ";
-			op_search = getch();
-			switch (op_search)
-			{
-			case '1':
-			{
-				cout << "\nInput Reader ID to Search : ";
-				cin >> search;
-				found = 0;
-				line = 0;
-				for (int i = 0; i < n; i++)
-				{
-					if (search == obj[i].getId())
-					{
-						found = 1;
-						if (i <= 1)
-						{
-							clrscr();
-							reader_header();
-						}
-						line++;
-						gotoxy(10, 7 + line);
-						obj[i].show_reader();
-					}
-				}
-				if (found == 1)
-				{
-					drawBoxSingleLine(9, 6, 100, line);
-					getch();
-				}
-				if (found == 0)
-				{
-					cout << "Error : NOT FOUND!" << endl;
-					getch();
-				}
-			}
-			break;
-			case '2':
-			{
-				cout << "\nInput Reader NAME to Search : ";
-				cin >> search;
-				found = 0;
-				line = 0;
-				for (int i = 0; i < n; i++)
-				{
-					if (search == obj[i].getName())
-					{
-						found = 1;
-						if (i <= 1)
-						{
-							clrscr();
-							reader_header();
-						}
-						line++;
-						gotoxy(10, 7 + line);
-						obj[i].show_reader();
-					}
-				}
-				if (found == 1)
-				{
-					drawBoxSingleLine(9, 6, 100, line);
-					getch();
-				}
-				if (found == 0)
-				{
-					cout << "Error : NOT FOUND!" << endl;
-					getch();
-				}
-			}
-			break;
-			default:
-				break;
-			}
-		} while (op_search != '0');
-	}
-	// *===== SORT READER =====*
-	void sortReader(ReaderData obj[], int r)
-	{
-		ReaderData objtmp;
-		char op_sort;
-		int found;
-		do
-		{
-			clrscr();
-			cout << "\n---------------------------------" << endl;
-			cout << ">>> [SORT READER INFORMATION] <<<" << endl;
-			cout << "---------------------------------" << endl;
-			cout << "\t[1] Sort By ID" << endl
-				 << "\t[2] Sort By NAME" << endl
-				 << "\t[3] Sort By TYPE" << endl
-				 << "\t[0] Back" << endl;
-			cout << "---------------------------------" << endl;
-			cout << "--> Choose one opition : ";
-			op_sort = getch();
-			switch (op_sort)
-			{
-			case '1':
-			{
-				found = 0;
-				for (int i = 0; i < r; i++)
-				{
-					for (int j = i + 1; j < r; j++)
-					{
-						if (obj[i].getId() < obj[j].getId())
-						{
-							objtmp = obj[i];
-							obj[i] = obj[j];
-							obj[j] = objtmp;
-							found = 1;
-						}
-					}
-				}
-				if (found == 0)
-				{
-					cout << "Sort Not Success!" << endl;
-					getch();
-				}
-				else
-				{
-					cout << "Sort Successfully!" << endl;
-					getch();
-				}
-			}
-			break;
-			case '2':
-			{
-				found = 0;
-				for (int i = 0; i < r; i++)
-				{
-					for (int j = i + 1; j < r; j++)
-					{
-						if (obj[i].getName() < obj[j].getName())
-						{
-							objtmp = obj[i];
-							obj[i] = obj[j];
-							obj[j] = objtmp;
-							found = 1;
-						}
-					}
-				}
-				if (found == 0)
-				{
-					cout << "Sort Not Success!" << endl;
-					getch();
-				}
-				else
-				{
-					cout << "Sort Successfully!" << endl;
-					getch();
-				}
-			}
-			break;
-			case '3':
-			{
-				found = 0;
-				for (int i = 0; i < r; i++)
-				{
-					for (int j = i + 1; j < r; j++)
-					{
-						if (obj[i].getType() < obj[j].getType())
-						{
-							objtmp = obj[i];
-							obj[i] = obj[j];
-							obj[j] = objtmp;
-							found = 1;
-						}
-					}
-				}
-				if (found == 0)
-				{
-					cout << "Sort Not Success!" << endl;
-					getch();
-				}
-				else
-				{
-					cout << "Sort Successfully!" << endl;
-					getch();
-				}
-			}
-			break;
-			default:
-				break;
-			}
-		} while (op_sort != '0');
-	}
-	// *===== UPDATE READER =====*
-	void updateReder(ReaderData obj[], int r)
-	{
-		char op_update;
-		string search;
-		int found, line, a = 0;
-		do
-		{
-			clrscr();
-			foreColor(7);
-			cout << "----------------------------------" << endl;
-			cout << "\t[1] Update By Code" << endl
-				 << "\t[2] Update By Author" << endl
-				 << "\t[0] Back" << endl;
-			cout << "----------------------------------" << endl;
-			cout << "--> Choose one option : ";
-			op_update = getch();
-			switch (op_update)
-			{
-			case '1':
-			{
-				line = 0;
-				// gotoxy(10, 15);
-				cout << "\nInput Reader ID to Update : ";
-				cin >> search;
-				found = 0;
-				// Loading();
-				for (int i = 0; i < n; i++)
-				{
-					drawBoxSingleLine(9, 6, 100, line);
-					if (search == obj[i].getId())
-					{
-						clrscr();
-						line++;
-						obj->reader_header();
-						gotoxy(10, 7 + a);
-						obj[i].show_reader();
-						drawBoxSingleLine(9, 6, 100, line);
-						found = 1;
-						cout << "\n\tPress 'Enter' to Update or 'ESC' to Exit:: ";
-						if (getch() == 13)
-						{
-							a++;
-							do
-							{
-								cout << "\n---------------------------------" << endl
-									 << "==== What you want to update ====" << endl
-									 << "---------------------------------" << endl
-									 << "\t[1] Id\t\t[4] Type" << endl
-									 << "\t[2] Name\t\t[5] Date" << endl
-									 << "\t[3] Phone\t\t[6] Update All" << endl
-									 << "\t\t[0] Back" << endl
-									 << "---------------------------------" << endl
-									 << "--> Choose one option : ";
-								op_update = getch();
-								switch (op_update)
-								{
-								case '1':
-								{
-									cout << "\n--> Update Id [" << obj[i].getId() << "] to : ";
-									cin >> obj[i].rid;
-								}
-								break;
-								case '2':
-								{
-									cout << "\n--> Update Name [" << obj[i].getName() << "] to : ";
-									cin.clear();
-									cin.ignore();
-									getline(cin, obj[i].name);
-								}
-								break;
-								case '3':
-								{
-									cout << "\n--> Update Phone [" << obj[i].getPhone() << "] to : ";
-									cin >> obj[i].phone;
-								}
-								break;
-								case '4':
-								{
-									cout << "\n--> Update Date [" << obj[i].getType() << "] to : ";
-									cin >> obj[i].type;
-								}
-								break;
-								case '5':
-								{
-									cout << "\n--> Update Qty [" << obj[i].getRDate() << "] to : ";
-									cin >> obj[i].date;
-								}
-								break;
-								case '6':
-								{
-									cout << "\n--> UPDATE ALL BOOK INFORMATION [CODE:" << obj[i].getId() << " ]" << endl;
-									obj[i].input_reader();
-								}
-								break;
+		int found = 0, index = 0;;
+		drawBoxSingleLine(38, 4, 10, 1);
+		gotoxy(22, 5); cout << "Input Reader ID";
+		gotoxy(39, 5); cin >> search;
+		ifstream reader_file;
+		reader_file.open("data/reader_information.txt");
 
-								default:
-									break;
-								}
-							} while (op_update != '0');
-						}
-						else if (getch() == 27)
-						{
-							break;
-						}
-					}
-				}
-				if (found == 0)
-				{
-					gotoxy(47, 15);
-					cout << "\nError : NOT FOUND!" << endl;
-					getch();
-				}
-			}
-			break;
-			case '2':
+		reader_header();
+		while (!reader_file.eof())
+		{
+			reader_file >> reader.rid >> reader.name >> reader.phone >> reader.type >> reader.date;
+			if (reader.rid == search)
 			{
-				line = 0;
-				// gotoxy(10, 15);
-				cout << "\nInput Reader Name to Update : ";
-				cin >> search;
-				found = 0;
-				// Loading();
-				for (int i = 0; i < n; i++)
-				{
-					drawBoxSingleLine(9, 6, 100, line);
-					if (search == obj[i].getName())
-					{
-						clrscr();
-						line++;
-						obj->reader_header();
-						gotoxy(10, 7 + a);
-						obj[i].show_reader();
-						drawBoxSingleLine(9, 6, 100, line);
-						found = 1;
-						cout << "\n\tPress 'Enter' to Update or 'ESC' to Exit:: ";
-						if (getch() == 13)
-						{
-							a++;
-							do
-							{
-								cout << "\n---------------------------------" << endl
-									 << "==== What you want to update ====" << endl
-									 << "---------------------------------" << endl
-									 << "\t[1] Id\t\t[4] Type" << endl
-									 << "\t[2] Name\t\t[5] Date" << endl
-									 << "\t[3] Phone\t\t[6] Update All" << endl
-									 << "\t\t[0] Back" << endl
-									 << "---------------------------------" << endl
-									 << "--> Choose one option : ";
-								op_update = getch();
-								switch (op_update)
-								{
-								case '1':
-								{
-									cout << "\n--> Update Id [" << obj[i].getId() << "] to : ";
-									cin >> obj[i].rid;
-								}
-								break;
-								case '2':
-								{
-									cout << "\n--> Update Name [" << obj[i].getName() << "] to : ";
-									cin.clear();
-									cin.ignore();
-									getline(cin, obj[i].name);
-								}
-								break;
-								case '3':
-								{
-									cout << "\n--> Update Phone [" << obj[i].getPhone() << "] to : ";
-									cin >> obj[i].phone;
-								}
-								break;
-								case '4':
-								{
-									cout << "\n--> Update Date [" << obj[i].getType() << "] to : ";
-									cin >> obj[i].type;
-								}
-								break;
-								case '5':
-								{
-									cout << "\n--> Update Qty [" << obj[i].getRDate() << "] to : ";
-									cin >> obj[i].date;
-								}
-								break;
-								case '6':
-								{
-									cout << "\n--> UPDATE ALL BOOK INFORMATION [CODE:" << obj[i].getId() << " ]" << endl;
-									obj[i].input_reader();
-								}
-								break;
-
-								default:
-									break;
-								}
-							} while (op_update != '0');
-						}
-						else if (getch() == 27)
-						{
-							break;
-						}
-					}
-				}
-				if (found == 0)
-				{
-					gotoxy(47, 15);
-					cout << "\nError : NOT FOUND!" << endl;
-					getch();
-				}
+				found = 1;
+				foreColor(6);
+				show_reader(reader, index);
+				index++;
 			}
-			break;
-
-			default:
-				break;
-			}
-		} while (op_update != '0');
+			drawBoxSingleLine(9, 6, 100, index);
+			// reader_file.ignore(1000, '\n');
+		}
+		reader_file.close();
+		if (found == 0)
+		{
+			foreColor(4);
+			gotoxy(30, 7);
+			cout << "Reader Not Found!" << endl;
+		}
+		return search;
 	}
-	// *===== DELETE READER =====*
-	void deleteReader(ReaderData obj[], int r)
+	// =============== SORT READER [ID]===============
+	void sortReaderByID()
 	{
-		char delete_op;
-		string del_code, del_title;
-		int found;
-		clrscr();
-		cout << "\n---------------------------------" << endl;
-		cout << ">>> [DELETE READER INFORMATION] <<<" << endl;
-		cout << "---------------------------------" << endl;
-		cout << "\t[1] Delete By ID" << endl
-			 << "\t[2] Delete By NAME" << endl
-			 << "\t[0] Back" << endl;
-		cout << "---------------------------------" << endl;
-		cout << "--> Choose one opition : ";
-		delete_op = getch();
-		switch (delete_op)
+		int n=0, found = 0;
+		ReaderData R[MAX], objRtmp;
+		ofstream Reader_Tmp;
+		Reader_Tmp.open("data/temp.txt");
+		ifstream reader_file;
+		reader_file.open("data/reader_information.txt");
+
+		while (!reader_file.eof())
 		{
-		case '1':
+
+			reader_file >> R[n].rid >> R[n].name >> R[n].phone >> R[n].type >> R[n].date;
+			n++;
+
+		}
+		for (int i = 0; i < n; i++)
 		{
-			cout << "Enter Reader ID to Delete : ";
-			cin >> del_code;
-			for (int i = 0; i < n; i++)
+			for (int j = i + 1; j < n; j++)
 			{
-				if (del_code == obj[i].getId())
+				if ( R[i].rid > R[j].rid )
 				{
-					for (int j = i; j < r; j++)
-					{
-						obj[i] = obj[j + 1];
-					}
-					n--;
+					objRtmp = R[i];
+					R[i] = R[j];
+					R[j] = objRtmp;
 					found = 1;
 				}
 			}
-			if (found == 0)
-			{
-				cout << "Delete Not Success!" << endl;
-				getch();
-			}
-			else
-			{
-				cout << "Delete Successfully!" << endl;
-				getch();
-			}
 		}
-		break;
-		case '2':
+
+		for(int i = 0; i < n; i++)
 		{
-			cout << "Enter Reader NAME to Delete : ";
-			cin >> del_code;
-			for (int i = 0; i < n; i++)
+			Reader_Tmp << "\n" << R[i].rid
+					<< "\n" << R[i].name
+					<< "\n" << R[i].phone
+					<< "\n" << R[i].type
+					<< "\n" << R[i].date;
+		}
+			reader_file.close();
+			Reader_Tmp.close();
+			remove("data/reader_information.txt");
+			rename("data/temp.txt", "data/reader_information.txt");
+
+		if(found == 1) { foreColor(2); cout << "\n\t[SORT COMPLETED!]"; } else { foreColor(4); cout << "\n\t[SORT NOT COMPLETE!]"; }
+	}
+	// =============== SORT READER [NAME] ===============
+	
+	void sortReaderByNAME()
+	{
+		int n=0, found = 0;
+		ReaderData R[MAX], objRtmp;
+		ofstream Reader_Tmp;
+		Reader_Tmp.open("data/temp.txt");
+		ifstream reader_file;
+		reader_file.open("data/reader_information.txt");
+
+		while (!reader_file.eof())
+		{
+
+			reader_file >> R[n].rid >> R[n].name >> R[n].phone >> R[n].type >> R[n].date;
+			n++;
+
+		}
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = i + 1; j < n; j++)
 			{
-				if (del_code == obj[i].getName())
+				if ( R[i].rid > R[j].rid )
 				{
-					for (int j = i; j < r; j++)
-					{
-						obj[i] = obj[j + 1];
-					}
-					n--;
+					objRtmp = R[i];
+					R[i] = R[j];
+					R[j] = objRtmp;
 					found = 1;
 				}
 			}
-			if (found == 0)
-			{
-				cout << "Delete Not Success!" << endl;
-				getch();
-			}
-			else
-			{
-				cout << "Delete Successfully!" << endl;
-				getch();
-			}
 		}
-		break;
-		default:
-			break;
+
+		for(int i = 0; i < n; i++)
+		{
+			Reader_Tmp << "\n" << R[i].rid
+					<< "\n" << R[i].name
+					<< "\n" << R[i].phone
+					<< "\n" << R[i].type
+					<< "\n" << R[i].date;
+		}
+			reader_file.close();
+			Reader_Tmp.close();
+			remove("data/reader_information.txt");
+			rename("data/temp.txt", "data/reader_information.txt");
+
+		if(found == 1) { foreColor(2); cout << "\n\t[SORT COMPLETED!]"; } else { foreColor(4); cout << "\n\t[SORT NOT COMPLETE!]"; }
+	}
+	// =============== UPDATE READER ===============
+	void updateReader()
+	{
+		char update_op;
+		string R_id = searchReader();
+		
+		cout << "\n\tYou want to update this Reader Data (y/n) : "; cin >> update_op;
+		if(update_op == 'y' || update_op == 'Y')
+		{
+			ReaderData NewReader;;
+			foreColor(7); cout << "Input Reader Name  : "; foreColor(6); cin.clear(); cin.ignore(); getline(cin, NewReader.name);
+			foreColor(7); cout << "Input Reader Phone : "; foreColor(6); cin >> NewReader.phone;
+			foreColor(7); cout << "Input Reader Type  : "; foreColor(6); cin >> NewReader.type;
+			foreColor(7); cout << "Input Reader Date  : "; foreColor(6); cin >> NewReader.date;
+
+			ReaderData reader;
+			ofstream Reader_Tmp;
+			Reader_Tmp.open("data/temp.txt");
+			ifstream reader_file;
+			reader_file.open("data/reader_information.txt");
+
+			while(!reader_file.eof())
+			{
+				reader_file >> reader.rid >> reader.name >> reader.phone >> reader.type >> reader.date;
+
+				NewReader.rid = reader.rid;
+				
+				if(R_id != reader.rid)
+				{
+					Reader_Tmp << endl << reader.rid
+								<< "\t" << reader.name 
+								<< "\t" << reader.phone 
+								<< "\t" << reader.type 
+								<< "\t" << reader.date;
+				}
+				else
+				{
+					Reader_Tmp << endl << NewReader.rid
+								<< "\t" << NewReader.name 
+								<< "\t" << NewReader.phone 
+								<< "\t" << NewReader.type 
+								<< "\t" << NewReader.date;
+				}
+			}
+
+			 
+			reader_file.close();
+			Reader_Tmp.close();
+			remove("data/reader_information.txt");
+			rename("data/temp.txt", "data/reader_information.txt");
+			foreColor(2);
+			cout << "\n\t[UPDATE COMPLETED!]";
+		}
+		else
+		{
+			foreColor(4);
+			cout << "\n\t[UPDATE NOT COMPLETED!]";
+		}
+	}
+	// =============== DELETE READER ===============
+	void deleteReader()
+	{
+		char del_op;
+		string R_id = searchReader();
+		cout << "\n\tYou want to delete this Reader Data (y/n) : "; cin >> del_op;
+		if(del_op == 'y' || del_op == 'Y')
+		{
+			ReaderData reader;
+			ofstream Reader_Tmp;
+			Reader_Tmp.open("data/temp.txt");
+			ifstream reader_file;
+			reader_file.open("data/reader_information.txt");
+			while(!reader_file.eof())
+			{
+				reader_file >> reader.rid >> reader.name >> reader.phone >> reader.type >> reader.date;
+				
+				if(R_id != reader.rid)
+				{
+					Reader_Tmp << endl << reader.rid
+								<< "\t" << reader.name 
+								<< "\t" << reader.phone 
+								<< "\t" << reader.type 
+								<< "\t" << reader.date;
+				}
+			}
+			reader_file.close();
+			Reader_Tmp.close();
+			remove("data/reader_information.txt");
+			rename("data/temp.txt", "data/reader_information.txt");
+			foreColor(2);
+			cout << "\n\t[DELETE COMPLETED!]";
+		}
+		else
+		{
+			foreColor(4);
+			cout << "\n\t[DELETE NOT COMPLETED!]";
 		}
 	}
 };
-
 // *===================================================
 // *             *__Borrow_And_Return__*
 // *===================================================
-class BorrowerData : protected BookData, protected ReaderData
+
+class BorrowerData : protected BookData, ReaderData
 {
 private:
-	string brID, br_date, status;
+	string br_id, br_date, br_status;
+	string reader_id, book_code;
 	int qty;
 
 public:
 	BorrowerData()
 	{
-		brID = getId();
+		br_id = "NULL";
+		br_date = "NULL";
 	}
-	void input_borrow()
+	void check_borrower_status();
+	void borrow_header()
 	{
-		cout << "Add Borrow";
+		foreColor(4);
+		drawBoxSingleLine(9, 3, 100, 1);
+		gotoxy(10, 4);
+		foreColor(7);
+		cout << left
+			 << setw(10) << "ID"
+			 << setw(25) << "READER ID"
+			 << setw(17) << "BOOK CODE"
+			 << setw(17) << "DATE"
+			 << setw(17) << "QUNATITY"
+			 << "STATUS";
 	}
-	void show_borrow()
+	void input_borrower()
 	{
-		cout << "haha you\'re borrower" << endl;
+		char br_op;
+		string new_borrower_id;
+		clrscr();
+
+		foreColor(8); drawBoxSingleLine(43, 1, 35, 3); gotoxy(45, 3); cout << "[ INPUT BORROWER INFORMATION ]";
+
+		string reader_id = searchReader(); getch();
+		cout << "\n\tThis Reader want to Borrow? (y/n) : "; cin >> br_op;
+		if(br_op == 'y' || br_op == 'Y')
+		{
+			clrscr();
+			foreColor(8); drawBoxSingleLine(43, 1, 35, 3); gotoxy(45, 3); cout << "[ INPUT BORROWER INFORMATION ]";
+
+			string book_code = searchBook(); getch();
+
+		check_id:
+			foreColor(7); cout << "Input Borrower ID    : "; foreColor(6); cin >> new_borrower_id;
+			ifstream check_file("data/borrower_information.txt");
+
+			string existing_borrower_id;
+			bool code_exists = false;
+			while (getline(check_file, existing_borrower_id))
+			{
+				if (existing_borrower_id == new_borrower_id)
+				{
+					code_exists = true;
+					break;
+				}
+			}
+
+			check_file.close();
+
+			if (code_exists)
+			{
+				foreColor(4);
+				cout << "This ID is already exists."; getch();
+				goto check_id;
+				return;
+			}
+
+			foreColor(7); cout << "Input Date        : "; foreColor(6); cin >> br_date;
+			foreColor(7); cout << "Input QTY of Book : "; foreColor(6); cin >> qty;
+			ofstream borrower_file("data/borrower_information.txt", ios::app);
+
+			borrower_file << endl << new_borrower_id
+						<< "\t" << reader_id 
+						<< "\t" << book_code 
+						<< "\t" << br_date 
+						<< "\t" << qty;
+			borrower_file.close();
+
+			foreColor(2); cout << "SAVE COMPLITE!";
+		}
+		else 
+		{
+			foreColor(4); cout << "CANCELED!";
+		}
+	}
+	void show_borrower(BorrowerData br, int i)
+	{
+		foreColor(6);
+		gotoxy(10, 7 + i);
+		cout << left 
+				<< setw(10) << br.br_id 
+				<< setw(25) << br.reader_id 
+				<< setw(17) << br.book_code 
+				<< setw(17) << br.br_date 
+				<< setw(17) << br.qty
+				<< setw(17) << br.br_status
+				<< endl;
+	}
+	void show_borrower_list()
+	{
+		BorrowerData borrower;
+		int index = 0;
+		ifstream borrower_file;
+		borrower_file.open("data/borrower_information.txt");
+		borrow_header();
+		while (!borrower_file.eof())
+		{
+			borrower_file  >> borrower.br_id  >> borrower.reader_id  >> borrower.book_code   >> borrower.br_date   >> borrower.qty;
+			foreColor(6);
+			show_borrower(borrower, index);
+			index++;
+		}
+		borrower_file.close();
+		drawBoxSingleLine(9, 6, 100, index);
+	}
+
+	string searchBorrower()
+	{
+		BorrowerData borrower;
+		string search;
+		int found = 0, index = 0;;
+		drawBoxSingleLine(41, 4, 10, 1);
+		gotoxy(22, 5); cout << "Input Borrower ID"; gotoxy(43, 5); cin >> search;
+		ifstream borrower_file;
+		borrower_file.open("data/borrower_information.txt");
+
+		reader_header();
+		while (!borrower_file.eof())
+		{
+			borrower_file  >> borrower.br_id  >> borrower.reader_id  >> borrower.book_code   >> borrower.br_date   >> borrower.qty;
+			if (borrower.br_id == search)
+			{
+				found = 1;
+				foreColor(6);
+				show_borrower(borrower, index);
+				index++;
+			}
+			drawBoxSingleLine(9, 6, 100, index);
+			// reader_file.ignore(1000, '\n');
+		}
+		borrower_file.close();
+		if (found == 0)
+		{
+			foreColor(4);
+			gotoxy(30, 7);
+			cout << "Reader Not Found!" << endl;
+		}
+		return search;
+	}
+	// =============== SORT READER [ID] ===============
+	
+	void sortBorrowerByID()
+	{
+		int n=0, found = 0;
+		BorrowerData BR[MAX], objBRtmp;
+		ofstream borrower_Tmp;
+		borrower_Tmp.open("data/temp.txt");
+		ifstream borrower_file;
+		borrower_file.open("data/reader_information.txt");
+
+		while (!borrower_file.eof())
+		{
+
+			borrower_file >> BR[n].br_id  >> BR[n].reader_id  >> BR[n].book_code   >> BR[n].br_date   >> BR[n].qty;
+			n++;
+
+		}
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = i + 1; j < n; j++)
+			{
+				if ( BR[i].br_id > BR[j].br_id )
+				{
+					objBRtmp = BR[i];
+					BR[i] = BR[j];
+					BR[j] = objBRtmp;
+					found = 1;
+				}
+			}
+		}
+
+		for(int i = 0; i < n; i++)
+		{
+			borrower_Tmp << endl << BR[i].br_id
+								<< "\t" << BR[i].reader_id
+								<< "\t" << BR[i].book_code
+								<< "\t" << BR[i].br_date
+								<< "\t" << BR[i].qty;
+		}
+			borrower_file.close();
+			borrower_Tmp.close();
+			remove("data/borrower_information.txt");
+			rename("data/temp.txt", "data/borrower_information.txt");
+
+		if(found == 1) { foreColor(2); cout << "\n\t[SORT COMPLETED!]"; } else { foreColor(4); cout << "\n\t[SORT NOT COMPLETE!]"; }
+	}
+	// =============== SORT READER [READER DATE] ===============
+	void sortBorrowerByDATE()
+	{
+		int n=0, found = 0;
+		BorrowerData BR[MAX], objBRtmp;
+		ofstream borrower_Tmp;
+		borrower_Tmp.open("data/temp.txt");
+		ifstream borrower_file;
+		borrower_file.open("data/reader_information.txt");
+
+		while (!borrower_file.eof())
+		{
+
+			borrower_file >> BR[n].br_id  >> BR[n].reader_id  >> BR[n].book_code   >> BR[n].br_date   >> BR[n].qty;
+			n++;
+
+		}
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = i + 1; j < n; j++)
+			{
+				if ( BR[i].br_date > BR[j].br_date )
+				{
+					objBRtmp = BR[i];
+					BR[i] = BR[j];
+					BR[j] = objBRtmp;
+					found = 1;
+				}
+			}
+		}
+
+		for(int i = 0; i < n; i++)
+		{
+			borrower_Tmp << endl << BR[i].br_id
+								<< "\t" << BR[i].reader_id
+								<< "\t" << BR[i].book_code
+								<< "\t" << BR[i].br_date
+								<< "\t" << BR[i].qty;
+		}
+			borrower_file.close();
+			borrower_Tmp.close();
+			remove("data/borrower_information.txt");
+			rename("data/temp.txt", "data/borrower_information.txt");
+
+		if(found == 1) { foreColor(2); cout << "\n\t[SORT COMPLETED!]"; } else { foreColor(4); cout << "\n\t[SORT NOT COMPLETE!]"; }
+	}
+
+	void updateBorrower()
+	{
+		char update_op;
+		string Br_id = searchBorrower();
+		cout << "\n\tYou want to delete this Borrower Data (y/n) : "; cin >> update_op;
+
+		if(update_op == 'y' || update_op == 'Y')
+		{
+			BorrowerData NewBR;
+			foreColor(7); cout << "Input New Borrower DATE  : "; foreColor(6); cin >> NewBR.br_date;
+			foreColor(7); cout << "Input New Borrower QTY   : "; foreColor(6); cin >> NewBR.qty;
+
+			BorrowerData borrower;
+			ofstream borrower_Tmp;
+			borrower_Tmp.open("data/temp.txt");
+			ifstream borrower_file;
+			borrower_file.open("data/reader_information.txt");
+
+			while(!borrower_file.eof())
+			{
+				borrower_file  >> borrower.br_id  >> borrower.reader_id  >> borrower.book_code   >> borrower.br_date   >> borrower.qty;
+
+				NewBR.br_id = borrower.br_id;
+				NewBR.reader_id = borrower.reader_id;
+				NewBR.book_code = borrower.book_code;
+				
+				if(Br_id != borrower.br_id)
+				{
+					
+					borrower_Tmp << endl << borrower.br_id
+								<< "\t" << borrower.reader_id
+								<< "\t" << borrower.book_code
+								<< "\t" << borrower.br_date
+								<< "\t" << borrower.qty;
+				}
+				else
+				{
+					borrower_Tmp << endl << NewBR.br_id
+								<< "\t" << NewBR.reader_id
+								<< "\t" << NewBR.book_code
+								<< "\t" << NewBR.br_date
+								<< "\t" << NewBR.qty;
+				}
+			}
+
+			borrower_file.close();
+			borrower_Tmp.close();
+			remove("data/borrower_information.txt");
+			rename("data/temp.txt", "data/borrower_information.txt");
+			foreColor(2);
+			cout << "\n\t[UPDATE COMPLETED!]";
+		}
+		else
+		{
+			foreColor(4);
+			cout << "\n\t[UPDATE NOT COMPLETED!]";
+		}
+	}
+	void deleteBorrower()
+	{
+		char del_op;
+		string Br_id = searchBorrower();
+		cout << "\n\tYou want to delete this Borrower Data (y/n) : "; cin >> del_op;
+		if(del_op == 'y' || del_op == 'Y')
+		{
+			BorrowerData borrower;
+			ofstream borrower_Tmp;
+			borrower_Tmp.open("data/temp.txt");
+
+			ifstream borrower_file;
+			borrower_file.open("data/borrower_information.txt");
+			while(!borrower_file.eof())
+			{
+				borrower_file  >> borrower.br_id  >> borrower.reader_id  >> borrower.book_code   >> borrower.br_date   >> borrower.qty;
+				
+				if(Br_id != borrower.br_id)
+				{
+					borrower_Tmp << endl << borrower.br_id
+								<< "\t" << borrower.reader_id
+								<< "\t" << borrower.book_code
+								<< "\t" << borrower.br_date
+								<< "\t" << borrower.qty;
+				}
+			}
+			borrower_file.close();
+			borrower_Tmp.close();
+			remove("data/borrower_information.txt");
+			rename("data/temp.txt", "data/borrower_information.txt");
+			foreColor(2);
+			cout << "\n\t[DELETE COMPLETED!]";
+		}
+		else
+		{
+			foreColor(4);
+			cout << "\n\t[DELETE NOT COMPLETED!]";
+		} 
 	}
 };
 // *===================================================
-// *             FUNCTION AND SUB-FUNCTION
+// *             FUNCTION AND SUBFUNCTION
 // *===================================================
-// ======== Loading ========
+// =============== Loading ===============
 void Loading()
 {
-	int wWin = 0, hWin = 0;
+	clrscr();
 	hideCursor();
-	DrawRectangle(28 + wWin, 14, 54, 1, 1);
-	gotoxy(30 + wWin, 15);
+	string line;
+	
+	ifstream loading_file("data/artText/loading.txt");
+	int LDPosX = 3, LDPosY = 3, g = 5;
+	while (getline(loading_file, line))
+	{
+		foreColor(2);
+		gotoxy(30, g++);
+		cout << line << "\n";
+	}
+	gotoxy(30 + LDPosX, 10 + LDPosY);
+	foreColor(4);
 	for (int i = 0; i < 50; i++)
 	{
-		foreColor(7);
-		printf("%c", 177);
+		cout << (char)177;
 	}
-	gotoxy(30 + wWin, 15);
+	gotoxy(30 + LDPosX, 10 + LDPosY);
+	foreColor(2);
 	for (int i = 0; i < 50; i++)
 	{
-		foreColor(3);
-		printf("%c", 219);
-		Sleep(100 - i * 1.8);
+		cout << (char)219;
+		if (i < 8)
+		{
+			Sleep(5);
+		}
+		else if (i < 20)
+		{
+			Sleep(80);
+		}
+		else
+		{
+			Sleep(5);
+		}
 	}
+	loading_file.close();
 	showCursor();
 }
-// ======== Header Menu ========
+// =============== Header Menu ===============
 void header_menu()
 {
 	ifstream art_file("data/artText/header.txt");
-	int wWin = 0, hWin = 10, g = 2;
+	int HWinPosX = 5, HWinPosY = 10, g = 2;
 	string line;
 	clrscr();
-	while (std::getline(art_file, line))
+	foreColor(2);
+	while (getline(art_file, line))
 	{
 		gotoxy(15, g++);
-		std::cout << line << "\n";
+		cout << line << "\n";
 	}
 	cout << endl;
 	art_file.close();
-	DrawRectangle(10, 1, 98, 10, 7);
-	// DrawRectangle(22, 5, 62, 4, 8);
-	gotoxy(37 + wWin, 2 + hWin);
-	foreColor(7);
-	cout << "[ LIBRARY - Management System ]";
-	gotoxy(23 + wWin, 6 + hWin);
-	cout << "[1]  Book Information";
-	gotoxy(60 + wWin, 6 + hWin);
-	cout << "[2]  Reader Information";
-	gotoxy(23 + wWin, 8 + hWin);
-	cout << "[3]  Borrower Information";
-	gotoxy(60 + wWin, 8 + hWin);
-	cout << "[0]  Exit program";
-	gotoxy(35 + wWin, 12 + hWin);
-	cout << "Please choose one option : ";
-	op = getch();
+	foreColor(9); DrawRectangle(10, 1, 98, 9, 7);
+	foreColor(6);
+	gotoxy(37 + HWinPosX, 3 + HWinPosY); cout << "[ LIBRARY - Management System ]";
+	gotoxy(23 + HWinPosX, 6 + HWinPosY); cout << "[1]  Book Information";
+	gotoxy(60 + HWinPosX, 6 + HWinPosY); cout << "[2]  Reader Information";
+	gotoxy(23 + HWinPosX, 8 + HWinPosY); cout << "[3]  Borrower Information";
+	gotoxy(60 + HWinPosX, 8 + HWinPosY); cout << "[0]  Exit program";
+	foreColor(3); gotoxy(45 + HWinPosX, 10 + HWinPosY); cout << "[R] About";
+	foreColor(4); gotoxy(37 + HWinPosX, 12 + HWinPosY); cout << "Please choose one option : "; foreColor(2); cin >> op;
 }
-// ======== case header ========
+// =============== case header ===============
 void case__header(string str)
 {
+	int chPosY = 0, chPosX = 12;
 	clrscr();
 	foreColor(2);
-	DrawRectangle(5, 2, 85, 8);
-	gotoxy(37, 2);
-	foreColor(9);
-	cout << "[ " << str << " Information ]";
+	DrawRectangle(5 + chPosX, 2 + chPosY, 86, 8);
+	foreColor(2);
+	gotoxy(37 + chPosX, 2 + chPosY); cout << "[ " << str << " Information ]";
 	foreColor(6);
-	gotoxy(10, 4);
-	// cout << "[1] Input " << str << "\n\n";
-	cout << "[1] Input " << str;
-	gotoxy(40, 4);
-	cout << "[2] Show " << str;
-	gotoxy(70, 4);
-	cout << "[3] Search " << str;
-	gotoxy(10, 6);
-	cout << "[4] Sort " << str;
-	gotoxy(40, 6);
-	cout << "[5] Update " << str;
-	gotoxy(70, 6);
-	cout << "[6] Delete " << str;
-	gotoxy(40, 8);
-	cout << "[0] Back to Home\n\n";
-	DrawRectangle(9, 10, 32, 1);
-	DrawRectangle(10, 10, 30, 1);
-	gotoxy(10, 11);
-	foreColor(5);
-	cout << "Please choose one option:     ";
+	gotoxy(10 + chPosX, 4 + chPosY); cout << "[1] Input " << str;
+	gotoxy(40 + chPosX, 4 + chPosY); cout << "[2] Show " << str;
+	gotoxy(70 + chPosX, 4 + chPosY); cout << "[3] Search " << str;
+	gotoxy(10 + chPosX, 6 + chPosY); cout << "[4] Sort " << str;
+	gotoxy(40 + chPosX, 6 + chPosY); cout << "[5] Update " << str;
+	gotoxy(70 + chPosX, 6 + chPosY); cout << "[6] Delete " << str;
+	gotoxy(40 + chPosX, 8 + chPosY); cout << "[0] Back to Home\n\n";
+	
+	DrawRectangle(10 + chPosX, 10 + chPosY, 32, 1);
+	foreColor(9);
+	gotoxy(10 + chPosX, 11 + chPosY); cout << "Please choose one option:       ";
+	gotoxy(36 + chPosX, 11 + chPosY);
 }
 void clrscr()
 {
 	system("cls");
 }
-// ======== HIDE CURSOR ========
+// =============== HIDE CURSOR ===============
 void hideCursor()
 {
 	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1523,7 +1404,7 @@ void hideCursor()
 	info.bVisible = FALSE;
 	SetConsoleCursorInfo(consoleHandle, &info);
 }
-// ======== SHOW CURSOR ========
+// =============== SHOW CURSOR ===============
 void showCursor()
 {
 	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1575,6 +1456,32 @@ bool IsRunAsAdmin()
 		CloseHandle(hToken);
 	}
 	return fIsRunAsAdmin;
+}
+void SetUpWindowConsole_App()
+{
+	system("cls & title Library Program - %USERNAME% - %DATE%");
+	SetWinConsole();
+	if (!IsRunAsAdmin())
+	{
+		system("title Please Run As Administrator");
+		string line;
+		ifstream art_file("data/artText/runadmin.txt");
+		// Request admin privileges
+		foreColor(2);
+		while (getline(art_file, line))
+		{
+			cout << line << "\n";
+		}
+		art_file.close();
+		if (!art_file.eof())
+		{
+			cout << "Hello User! Please Run As Administrator... ";
+		}
+		getch();
+		//		ShellExecute(NULL, "runas", "main.exe", NULL, NULL, SW_SHOWNORMAL);
+				ShellExecute(NULL, "runas", "app.exe", NULL, NULL, SW_SHOWNORMAL);
+		exit(0);
+	}
 }
 
 #endif
