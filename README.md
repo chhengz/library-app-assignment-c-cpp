@@ -8,13 +8,15 @@
 
 ## Features
 > ** USER ** <br/>
-  -> LOGIN PASSWORD
+  -> LOGIN PASSWORD <br/>
   -> RESET PASSWORD
+#
 > ** GUI Console ** <br/>
-  -> Table
+  -> Table <br/>
   -> ...
+#
 > ** System ** <br />
-  -> Run as Administrator
+  -> Run as Administrator <br/>
   -> Fixed resizeble window 
 
 ![background](https://th.bing.com/th/id/R.e426702edf874b181aced1e2fa5c6cde?rik=al4fgdsp5hCYeA&pid=ImgRaw&r=0)
