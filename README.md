@@ -7,15 +7,15 @@
 
 
 ## Features
-> **Book Information** <br/>
-  -> Input <br/>
-  -> Output <br/>
- **Reader Information** <br/>
-  -> Input<br/>
-  -> Output<br/>
- **Borrower Information** <br/>
-  -> Input<br/>
-  -> Output<br/>
+> ** USER ** <br/>
+  -> LOGIN PASSWORD
+  -> RESET PASSWORD
+> ** GUI Console ** <br/>
+  -> Table
+  -> ...
+> ** System ** <br />
+  -> Run as Administrator
+  -> Fixed resizeble window 
 
 ![background](https://th.bing.com/th/id/R.e426702edf874b181aced1e2fa5c6cde?rik=al4fgdsp5hCYeA&pid=ImgRaw&r=0)
 
