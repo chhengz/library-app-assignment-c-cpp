@@ -18,8 +18,8 @@
     -> Fixed resizeble window 
 
 
-            ROYAL UNIVERSITY OF PHNOM PENH
-				            IT G26 Y1 A6
+            		ROYAL UNIVERSITY OF PHNOM PENH
+				IT G26 Y1 A6
 
 		Department	:	IT
 		Major		:	Computer Science
