@@ -1,4 +1,4 @@
-# Assignment C++, OOP
+# Assignment C C++, OOP
 
 #### RUPP 2022-2023 <br/> department IT CS (Computer Science)
 
@@ -7,14 +7,19 @@
 
 
 ## Features
- ** USER ** <br/>
-    -> LOGIN PASSWORD <br/>
-    -> RESET PASSWORD
- <br/>** GUI Console ** <br/>
-    -> Table <br/>
-    -> ... <br/>
- ** System ** <br />
-    -> Run as Administrator <br/>
+ * USER
+   
+    -> Login User <br />
+    -> Register User <br />
+    -> Reset Password
+ 
+ * GUI Console 
+
+    -> Table Layout <br />
+    
+ * System
+
+    -> Run as Administrator <br />
     -> Fixed resizeble window 
 
 
