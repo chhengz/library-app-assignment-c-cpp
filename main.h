@@ -14,8 +14,10 @@
 #include <windows.h>
 #include "style.h"
 
-#define MAX 1000
 using namespace std;
+
+#define MAX 1000
+#define MIN 1
 
 void SetWinConsole();
 void clrscr();
@@ -37,7 +39,6 @@ protected:
 	int id, status;
 	string name, sex;
 	string username, password;
-
 public:
 	string getUsername()
 	{
@@ -63,8 +64,11 @@ public:
 	// ======== Login ========
 	void Login_form()
 	{
+		int check_number_count = 0, 
+			width = 0, 
+			height = 5, 
+			g=0;
 		string __username, __password, line;
-		int check_number_count = 0, width = 0, height = 5, g=0;
 	login_page:
 		clrscr();
 		g = 3;
@@ -75,14 +79,12 @@ public:
 			cout << line << "\n";
 		}
 		cout << endl;
-		// user box
-		DrawRectangle(50 + width, 5 + height, 20, 1);
-		// pass box
-		DrawRectangle(50 + width, 9 + height, 20, 1);
-		gotoxy(40 + width, 6 + height); cout << "USERNAME";
-		gotoxy(40 + width, 10 + height); cout << "PASSWORD";
-		gotoxy(52 + width, 6 + height); cin >> __username;
-		gotoxy(52 + width, 10 + height); cin >> __password;
+		DrawRectangle(50 + width, 5 + height, 20, 1); // user box
+		gotoxy(40 + width, 6 + height); 	cout << "USERNAME";
+		DrawRectangle(50 + width, 9 + height, 20, 1); // pass box
+		gotoxy(40 + width, 10 + height); 	cout << "PASSWORD";
+		gotoxy(52 + width, 6 + height); 	cin >> __username;
+		gotoxy(52 + width, 10 + height); 	cin >> __password;
 		if (__username == "RUPP" && __password == "A6" || __username == getUsername() && __password == getPassword())
 		{
 			clrscr();
@@ -183,6 +185,14 @@ public:
 		return ss;
 	}
 
+	int book_title_length()
+	{
+		BookData b;
+		int length_b_title;
+		length_b_title = b.book_title.length();
+		return length_b_title;
+	}
+
 	string Check_Book_Staus(int t)
 	{
 		if (t >= 1)
@@ -217,11 +227,9 @@ public:
 	{
 		string new_book_code;
 		foreColor(7); cout << "Input Book Code      : "; foreColor(6); cin >> new_book_code;
-
 		ifstream check_file("data/book_information.txt");
 		string existing_book_code;
 		bool code_exists = false;
-
 		while (getline(check_file, existing_book_code))
 		{
 			if (existing_book_code == new_book_code)
@@ -231,7 +239,6 @@ public:
 			}
 		}
 		check_file.close();
-
 		if (code_exists)
 		{
 			foreColor(4);
@@ -243,15 +250,12 @@ public:
 		foreColor(7); cout << "Input Book Date   	: "; foreColor(6); cin >> book_date;
 		foreColor(7); cout << "Input Book Qty    	: "; foreColor(6); cin >> book_qty;
 		id++;
-
 		ofstream book_file("data/book_information.txt", ios::app);
 		book_file << endl << new_book_code << "\n" << book_title << "\n" << book_author << "\n" << book_date << "\n" << book_qty;
 		book_file.close();
-
 		book_file.open("data/ID_book.txt");
 		book_file << id;
 		book_file.close();
-
 		cout << "SAVE COMPLITE!";
 	}
 
@@ -260,24 +264,26 @@ public:
 	{
 		int i;
 		drawBoxSingleLine(9, 6 * i, 30 + book_title.length(), 7);
-		foreColor(3); gotoxy(5, 7 * i + 2); cout << "Book Code          :  " ; foreColor(6);cout << b.book_code << endl;
-		foreColor(3); gotoxy(5, 7 * i + 3); cout << "Book Title         :  " ; foreColor(1);cout <<b.book_title << endl;
-		foreColor(3); gotoxy(5, 7 * i + 4); cout << "Book Author        :  " ; foreColor(1);cout <<b.book_author << endl;
-		foreColor(3); gotoxy(5, 7 * i + 5); cout << "Book Date          :  " ; foreColor(1);cout <<b.book_date << endl;
-		foreColor(3); gotoxy(5, 7 * i + 6); cout << "Book Quantity      :  " ; foreColor(1);cout <<b.book_qty << endl;
-		foreColor(3); gotoxy(5, 7 * i + 7); cout << "Book Status        :  " ; foreColor(1);cout << Check_Book_Staus(b.book_qty) << endl;
+		foreColor(3); gotoxy(5, 7 * i + 2); cout << "Book Code          :  " ; foreColor(6); cout << b.book_code << endl;
+		foreColor(3); gotoxy(5, 7 * i + 3); cout << "Book Title         :  " ; foreColor(1); cout <<b.book_title << endl;
+		foreColor(3); gotoxy(5, 7 * i + 4); cout << "Book Author        :  " ; foreColor(1); cout <<b.book_author << endl;
+		foreColor(3); gotoxy(5, 7 * i + 5); cout << "Book Date          :  " ; foreColor(1); cout <<b.book_date << endl;
+		foreColor(3); gotoxy(5, 7 * i + 6); cout << "Book Quantity      :  " ; foreColor(1); cout <<b.book_qty << endl;
+		foreColor(3); gotoxy(5, 7 * i + 7); cout << "Book Status        :  " ; foreColor(1); cout << Check_Book_Staus(b.book_qty) << endl;
 	}
 
 	void show_book(BookData b, int i)
 	{
-		foreColor(3); gotoxy(8, 8 * i  + 3); cout << "Book Code          :  " ; foreColor(6);cout << b.book_code << endl;
-		foreColor(3); gotoxy(8, 8 * i  + 4); cout << "Book Title         :  " ; foreColor(1);cout <<b.book_title << endl;
-		foreColor(3); gotoxy(8, 8 * i  + 5); cout << "Book Author        :  " ; foreColor(1);cout <<b.book_author << endl;
-		foreColor(3); gotoxy(8, 8 * i  + 6); cout << "Book Date          :  " ; foreColor(1);cout <<b.book_date << endl;
-		foreColor(3); gotoxy(8, 8 * i  + 7); cout << "Book Quantity      :  " ; foreColor(1);cout <<b.book_qty << endl;
-		foreColor(3); gotoxy(8, 8 * i  + 8); cout << "Book Status        :  " ; foreColor(1);cout << Check_Book_Staus(b.book_qty) << endl;
+		foreColor(3); gotoxy(20, 8 * i  + 2); cout << "Book Code [ "; foreColor(6); cout << b.book_code; foreColor(3); cout << " ]" << endl;
+		foreColor(3); gotoxy(8, 8 * i  + 3); cout << "Book Title         :  " ; foreColor(1); cout <<b.book_title << endl;
+		foreColor(3); gotoxy(8, 8 * i  + 4); cout << "Book Author        :  " ; foreColor(5); cout <<b.book_author << endl;
+		foreColor(3); gotoxy(8, 8 * i  + 5); cout << "Book Date          :  " ; foreColor(1); cout <<b.book_date << endl;
 
-		// drawBoxSingleLine(3, (7 * i) + (2*i), 100, 7);
+		foreColor(3); gotoxy(52, 8 * i  + 5); cout << "Book Quantity      :  " ;
+		if (b.book_qty < 20) { foreColor(4); } else { foreColor(2); } cout <<b.book_qty << endl;
+
+		foreColor(3); gotoxy(8, 8 * i  + 6); cout << "Book Status        :  " ; foreColor(1); cout << Check_Book_Staus(b.book_qty) << endl;
+		// drawBoxSingleLine(6, 8 * i + 2, 50, 7);
 	}
 
 	// =============== SHOW BOOK LIST ===============
@@ -287,21 +293,16 @@ public:
 		int line = 0, index = 0;
 		ifstream book_file;
 		book_file.open("data/book_information.txt");
-
 		while (!book_file.eof())
 		{
 			book_file >> book.book_code;
 			book_file.ignore(); getline(book_file, book.book_title);
 			book_file >> book.book_author >> book.book_date >> book.book_qty;
-
 			index++;
-
-			foreColor(6);
-			gotoxy(10, 8 * index + 2);
-			cout << "No. " << index << endl;
+			foreColor(6); gotoxy(10, 8 * index + 2); cout << "No. " << index << endl;
 			show_book(book, index);
 		}
-			book_file.close();
+		book_file.close();
 		
 	}
 
@@ -311,50 +312,36 @@ public:
 		BookData book;
 		string search;
 		int found = 0, index = 0;;
-
 		drawBoxSingleLine(38, 4, 10, 1);
-		gotoxy(22, 5);
-		cout << "Input Book Code";
-		gotoxy(39, 5);
-		cin >> search;
-
+		gotoxy(22, 5); cout << "Input Book Code";
+		gotoxy(39, 5); cin >> search;
 		ifstream book_file;
 		book_file.open("data/book_information.txt");
-
 		while (!book_file.eof())
 		{
 			book_file >> book.book_code;
 			book_file.ignore();
 			getline(book_file, book.book_title);
 			book_file >> book.book_author >> book.book_date >> book.book_qty;
-
 			// Compare the book code with the search input
 			if (book.book_code == search)
 			{
 				index++;
-
-				foreColor(6);
-				gotoxy(10, 7 * index + 1);
-				cout << "No. " << index << endl;
-
+				foreColor(6); gotoxy(10, 7 * index + 1); cout << "No. " << index << endl;
 				show_book(book, index);
 				found = 1;
 				break;
 			}
-
 			// Move to the next line in the file
 			book_file.ignore(1000, '\n');
 		}
-
 		book_file.close();
-
 		if (found == 0)
 		{
 			foreColor(4);
 			gotoxy(30, 7);
 			cout << "Book Not Found!" << endl;
 		}
-
 		return search;
 	}
 	// =============== SORT BOOK [QTY] ===============
@@ -366,15 +353,12 @@ public:
 		Book_Tmp.open("data/temp.txt");
 		ifstream book_file;
 		book_file.open("data/book_information.txt");
-
 		while (!book_file.eof())
 		{
-
 			book_file >> B[n].book_code;
 			book_file.ignore(); getline(book_file, B[n].book_title);
 			book_file >> B[n].book_author >> B[n].book_date >> B[n].book_qty;
 			n++;
-
 		}
 		for (int i = 0; i < n; i++)
 		{
@@ -413,15 +397,12 @@ public:
 		Book_Tmp.open("data/temp.txt");
 		ifstream book_file;
 		book_file.open("data/book_information.txt");
-
 		while (!book_file.eof())
 		{
-
 			book_file >> B[n].book_code;
 			book_file.ignore(); getline(book_file, B[n].book_title);
 			book_file >> B[n].book_author >> B[n].book_date >> B[n].book_qty;
 			n++;
-
 		}
 		for (int i = 0; i < n; i++)
 		{
@@ -1106,8 +1087,8 @@ public:
 		}
 		return search;
 	}
-	// =============== SORT READER [ID] ===============
-	
+
+	// =============== SORT Borrower [ID] ===============
 	void sortBorrowerByID()
 	{
 		int n=0, found = 0;
@@ -1116,13 +1097,10 @@ public:
 		borrower_Tmp.open("data/temp.txt");
 		ifstream borrower_file;
 		borrower_file.open("data/reader_information.txt");
-
 		while (!borrower_file.eof())
 		{
-
 			borrower_file >> BR[n].br_id  >> BR[n].reader_id  >> BR[n].book_code   >> BR[n].br_date   >> BR[n].qty;
 			n++;
-
 		}
 		for (int i = 0; i < n; i++)
 		{
@@ -1165,10 +1143,8 @@ public:
 
 		while (!borrower_file.eof())
 		{
-
 			borrower_file >> BR[n].br_id  >> BR[n].reader_id  >> BR[n].book_code   >> BR[n].br_date   >> BR[n].qty;
 			n++;
-
 		}
 		for (int i = 0; i < n; i++)
 		{
@@ -1183,7 +1159,6 @@ public:
 				}
 			}
 		}
-
 		for(int i = 0; i < n; i++)
 		{
 			borrower_Tmp << endl << BR[i].br_id
@@ -1205,30 +1180,25 @@ public:
 		char update_op;
 		string Br_id = searchBorrower();
 		cout << "\n\tYou want to delete this Borrower Data (y/n) : "; cin >> update_op;
-
 		if(update_op == 'y' || update_op == 'Y')
 		{
 			BorrowerData NewBR;
 			foreColor(7); cout << "Input New Borrower DATE  : "; foreColor(6); cin >> NewBR.br_date;
 			foreColor(7); cout << "Input New Borrower QTY   : "; foreColor(6); cin >> NewBR.qty;
-
 			BorrowerData borrower;
 			ofstream borrower_Tmp;
 			borrower_Tmp.open("data/temp.txt");
 			ifstream borrower_file;
 			borrower_file.open("data/reader_information.txt");
-
 			while(!borrower_file.eof())
 			{
 				borrower_file  >> borrower.br_id  >> borrower.reader_id  >> borrower.book_code   >> borrower.br_date   >> borrower.qty;
-
 				NewBR.br_id = borrower.br_id;
 				NewBR.reader_id = borrower.reader_id;
 				NewBR.book_code = borrower.book_code;
 				
 				if(Br_id != borrower.br_id)
 				{
-					
 					borrower_Tmp << endl << borrower.br_id
 								<< "\t" << borrower.reader_id
 								<< "\t" << borrower.book_code
@@ -1244,7 +1214,6 @@ public:
 								<< "\t" << NewBR.qty;
 				}
 			}
-
 			borrower_file.close();
 			borrower_Tmp.close();
 			remove("data/borrower_information.txt");
@@ -1268,13 +1237,11 @@ public:
 			BorrowerData borrower;
 			ofstream borrower_Tmp;
 			borrower_Tmp.open("data/temp.txt");
-
 			ifstream borrower_file;
 			borrower_file.open("data/borrower_information.txt");
 			while(!borrower_file.eof())
 			{
 				borrower_file  >> borrower.br_id  >> borrower.reader_id  >> borrower.book_code   >> borrower.br_date   >> borrower.qty;
-				
 				if(Br_id != borrower.br_id)
 				{
 					borrower_Tmp << endl << borrower.br_id
@@ -1301,44 +1268,34 @@ public:
 // *===================================================
 // *             FUNCTION AND SUBFUNCTION
 // *===================================================
+
 // =============== Loading ===============
 void Loading()
 {
 	clrscr();
 	hideCursor();
 	string line;
-	
-	ifstream loading_file("data/artText/loading.txt");
 	int LDPosX = 3, LDPosY = 3, g = 5;
+	ifstream loading_file("data/artText/loading.txt");
 	while (getline(loading_file, line))
 	{
-		foreColor(2);
-		gotoxy(30, g++);
-		cout << line << "\n";
+		foreColor(2); gotoxy(30, g++); cout << line << "\n";
 	}
-	gotoxy(30 + LDPosX, 10 + LDPosY);
-	foreColor(4);
+	foreColor(4); gotoxy(30 + LDPosX, 10 + LDPosY);
 	for (int i = 0; i < 50; i++)
 	{
 		cout << (char)177;
 	}
-	gotoxy(30 + LDPosX, 10 + LDPosY);
-	foreColor(2);
+	foreColor(2); gotoxy(30 + LDPosX, 10 + LDPosY);
 	for (int i = 0; i < 50; i++)
 	{
 		cout << (char)219;
-		if (i < 8)
-		{
+		if (i < 8) 
 			Sleep(5);
-		}
 		else if (i < 20)
-		{
 			Sleep(80);
-		}
-		else
-		{
+		else 
 			Sleep(5);
-		}
 	}
 	loading_file.close();
 	showCursor();
@@ -1346,9 +1303,9 @@ void Loading()
 // =============== Header Menu ===============
 void header_menu()
 {
-	ifstream art_file("data/artText/header.txt");
-	int HWinPosX = 5, HWinPosY = 10, g = 2;
 	string line;
+	int HWinPosX = 5, HWinPosY = 10, g = 2;
+	ifstream art_file("data/artText/header.txt");
 	clrscr();
 	foreColor(2);
 	while (getline(art_file, line))
@@ -1375,7 +1332,7 @@ void case__header(string str)
 	clrscr();
 	foreColor(2);
 	DrawRectangle(5 + chPosX, 2 + chPosY, 86, 8);
-	foreColor(2);
+	foreColor(2); 
 	gotoxy(37 + chPosX, 2 + chPosY); cout << "[ " << str << " Information ]";
 	foreColor(6);
 	gotoxy(10 + chPosX, 4 + chPosY); cout << "[1] Input " << str;
@@ -1385,7 +1342,6 @@ void case__header(string str)
 	gotoxy(40 + chPosX, 6 + chPosY); cout << "[5] Update " << str;
 	gotoxy(70 + chPosX, 6 + chPosY); cout << "[6] Delete " << str;
 	gotoxy(40 + chPosX, 8 + chPosY); cout << "[0] Back to Home\n\n";
-	
 	DrawRectangle(10 + chPosX, 10 + chPosY, 32, 1);
 	foreColor(9);
 	gotoxy(10 + chPosX, 11 + chPosY); cout << "Please choose one option:       ";
@@ -1478,8 +1434,7 @@ void SetUpWindowConsole_App()
 			cout << "Hello User! Please Run As Administrator... ";
 		}
 		getch();
-		//		ShellExecute(NULL, "runas", "main.exe", NULL, NULL, SW_SHOWNORMAL);
-				ShellExecute(NULL, "runas", "app.exe", NULL, NULL, SW_SHOWNORMAL);
+		ShellExecute(NULL, "runas", "main.exe", NULL, NULL, SW_SHOWNORMAL);
 		exit(0);
 	}
 }
